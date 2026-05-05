@@ -12,6 +12,7 @@ use App\Models\guru;
 use App\Models\walas;
 use App\Models\kelas;
 use Illuminate\Support\Facades\DB;
+use App\Models\kbm;
 
 class DatabaseSeeder extends Seeder
 {
@@ -80,5 +81,20 @@ class DatabaseSeeder extends Seeder
                 'updated_at' => now(),
             ]);
         }
+
+        // Buat satu jadwal pasti untuk setiap walas agar halaman Jadwal tidak kosong
+        $allWalas = walas::all();
+        foreach ($allWalas as $w) {
+            // 1 slot jadwal contoh per walas (menghindari pelanggaran unique idguru)
+            kbm::create([
+                'idguru'  => $w->idguru,   // guru walas tersebut
+                'idwalas' => $w->idwalas,  // kelas walas tsb
+                'hari'    => 'Senin',
+                'mulai'   => '07:00',
+                'selesai' => '08:30',
+            ]);
+        }
+
+        // Catatan: Tidak menambah data acak tambahan untuk menghindari bentrok unique idguru
     }
 }

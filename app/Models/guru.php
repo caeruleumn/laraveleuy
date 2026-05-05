@@ -19,4 +19,9 @@ class guru extends Model
     {
         return $this->hasOne(walas::class, 'idguru', 'idguru');
     }
+
+    public function kbm()
+    {
+        return $this->hasMany(kbm::class);
+    }
 }

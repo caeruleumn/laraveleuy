@@ -23,6 +23,15 @@
 
     <form method="POST" action="{{ route('register.post') }}">
         @csrf
+        @if ($errors->any())
+            <div style="color: red;">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <p>Username:</p>
         <input type="text" name="username" placeholder="Username" required><br>
         <p>Password:</p>

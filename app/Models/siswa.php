@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class siswa extends Model
+class Siswa extends Model
 {
     use HasFactory;
     public function admin()
@@ -14,12 +14,17 @@ class siswa extends Model
     }
     protected $table = 'datasiswa';
     protected $primaryKey = 'id';
+    public $incrementing = false;
 
     protected $fillable = [
+        'id',
         'nama',
         'tb',
         'bb',
-        'username',
-        'password'
     ];
+
+    public function kelas()
+    {
+        return $this->hasMany(Kelas::class,'idsiswa','id');
+    }
 }

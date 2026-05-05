@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Hash;
 use Exception;
 use App\Models\siswa;
 use App\Models\guru;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 
 
 class adminController extends Controller
@@ -19,17 +21,17 @@ class adminController extends Controller
         return view('login');
     }
 
-    public function prosesLogin(Request $request)
+    public function prosesLogin(LoginRequest $request)
     {
+        $validated = $request->validated();
+        $admin = admin::where('username', $validated['username'])->first();
 
-        $admin = admin::where('username', $request->username)->first();
-
-        if ($admin && Hash::check($request->password, $admin->password)) {
+        if ($admin && Hash::check($validated['password'], $admin->password)) {
             // simpan ke session
             session([
-                'admin_id' => $admin->id,
-                'admin_username' => $admin->username,
-                'admin_role' => $admin->role
+                'admin_id'       => $admin->id,
+                'admin_username' => $admin->username, // sesuai field di tabel admin
+                'admin_role'     => $admin->role ?? 'guru', // sesuaikan dengan struktur anda
             ]);
             return redirect()->route('home');
         }
@@ -41,48 +43,33 @@ class adminController extends Controller
         return view('register');
     }
 
-    public function prosesRegister(Request $request)
+    public function prosesRegister(RegisterRequest $request)
     {
         try {
-            $request->validate([
-                'username' => 'required|string|max:50|unique:dataadmin,username',
-                'password' => 'required|string|min:8',
-                'role'     => 'required|string|in:admin,guru,siswa',
-            ]);
+            $data = $request->validated();
 
             // simpan ke dataadmin
             $admin = admin::create([
-                'username' => $request->username,
-                'password' => Hash::make($request->password),
-                'role'     => $request->role,
+                'username' => $data['username'],
+                'password' => Hash::make($data['password']),
+                'role'     => $data['role'],
             ]);
 
              // Kalau role guru → simpan juga ke tabel dataguru
-             if ($request->role === 'guru') {
-                $request->validate([
-                    'nama_guru'  => 'required|string|max:100',
-                    'mapel_guru' => 'required|string|max:100',
-                ]);
-            
+             if ($data['role'] === 'guru') {
                 Guru::create([
                     'id'    => $admin->id,
-                    'nama'  => $request->nama_guru,
-                    'mapel' => $request->mapel_guru,
+                    'nama'  => $data['nama_guru'],
+                    'mapel' => $data['mapel_guru'],
                 ]);
             }
             
-            if ($request->role === 'siswa') {
-                $request->validate([
-                    'nama_siswa' => 'required|string|max:100',
-                    'tb_siswa'   => 'required|numeric',
-                    'bb_siswa'   => 'required|numeric',
-                ]);
-            
+            if ($data['role'] === 'siswa') {
                 Siswa::create([
                     'id'   => $admin->id,
-                    'nama' => $request->nama_siswa,
-                    'tb'   => $request->tb_siswa,
-                    'bb'   => $request->bb_siswa,
+                    'nama' => $data['nama_siswa'],
+                    'tb'   => $data['tb_siswa'],
+                    'bb'   => $data['bb_siswa'],
                 ]);
             }
 

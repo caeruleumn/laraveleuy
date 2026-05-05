@@ -18,7 +18,7 @@ class admin extends Model
 
     public function siswa()
     {
-        return $this->hasOne(siswa::class, 'id');
+        return $this->hasOne(Siswa::class, 'id');
     }
 
     public function guru()
